@@ -4,11 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const resolve = require('resolve');
 
+const safeGuardPath = (resolvedPath: string) =>
+  path.join(...resolvedPath.split('/'));
+
 const relToRelPkgRoot = (resolvedPath, rootDir) =>
   path.relative(rootDir, resolvedPath);
 
 async function loadJS(resolvedPath, pkgJSON, rootDir) {
-  let content = fs.readFileSync(resolvedPath, 'utf-8');
+  let content = fs.readFileSync(safeGuardPath(resolvedPath), 'utf-8');
   let file = await csb.parseFile(content, pkgJSON);
 
   return Object.assign({}, file, {
@@ -17,7 +20,7 @@ async function loadJS(resolvedPath, pkgJSON, rootDir) {
 }
 
 async function loadSass(resolvedPath, pkgJSON, rootDir) {
-  let content = fs.readFileSync(resolvedPath, 'utf-8');
+  let content = fs.readFileSync(safeGuardPath(resolvedPath), 'utf-8');
   let file = await csb.parseSassFile(content);
   return Object.assign({}, file, {
     filePath: relToRelPkgRoot(resolvedPath, rootDir),
@@ -25,7 +28,7 @@ async function loadSass(resolvedPath, pkgJSON, rootDir) {
 }
 
 async function loadScss(resolvedPath, pkgJSON, rootDir) {
-  let content = fs.readFileSync(resolvedPath, 'utf-8');
+  let content = fs.readFileSync(safeGuardPath(resolvedPath), 'utf-8');
   let file = await csb.parseScssFile(content);
   return Object.assign({}, file, {
     filePath: relToRelPkgRoot(resolvedPath, rootDir),
@@ -33,7 +36,7 @@ async function loadScss(resolvedPath, pkgJSON, rootDir) {
 }
 
 async function loadRaw(resolvedPath, rootDir) {
-  let file = fs.readFileSync(resolvedPath, 'utf-8');
+  let file = fs.readFileSync(safeGuardPath(resolvedPath), 'utf-8');
   return {
     file,
     deps: {},
@@ -44,7 +47,7 @@ async function loadRaw(resolvedPath, rootDir) {
 /* Remove the disable once image loading has been built */
 /* eslint-disable-next-line no-unused-vars */
 async function loadImages(resolvedPath, rootDir) {
-  let file = fs.readFileSync(resolvedPath);
+  let file = fs.readFileSync(safeGuardPath(resolvedPath));
   return {
     file: new Buffer(file).toString('base64'),
     deps: {},
